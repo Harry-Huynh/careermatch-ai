@@ -10,20 +10,26 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { loginWithGoogle } from "@/actions/auth";
+import { useRouter } from "next/navigation";
+import Field from "../ui/fieldInput";
+import { loginWithCredentials } from "@/actions/auth";
 
 const loginSchema = z.object({
   email: z.email("Enter a valid email address."),
-  password: z.string().min(8, "Password must be at least 8 characters."),
+  password: z.string().nonempty("Enter your password."),
 });
 
-const registerSchema = loginSchema
-  .extend({
+const registerSchema = z
+  .object({
+    email: z.email("Enter a valid email address."),
+    password: z.string().min(8, "Password must be at least 8 characters."),
     name: z.string().min(2, "Enter your name."),
-    confirmPassword: z.string().min(8, "Confirm your password."),
+    confirmPassword: z.string().min(8, "Passwords do not match."),
   })
   .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
     path: ["confirmPassword"],
-    message: "Passwords must match.",
   });
 
 type LoginValues = z.infer<typeof loginSchema>;
@@ -31,15 +37,26 @@ type RegisterValues = z.infer<typeof registerSchema>;
 
 export function LoginForm() {
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginValues>({ resolver: zodResolver(loginSchema) });
 
-  function onSubmit() {
+  async function onSubmit(data: LoginValues) {
     setLoading(true);
-    window.setTimeout(() => setLoading(false), 900);
+
+    try {
+      const result = await loginWithCredentials(data.email, data.password);
+      if (result?.error) {
+        setErrorMessage(result.error);
+      }
+    } catch {
+      setErrorMessage("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -47,7 +64,7 @@ export function LoginForm() {
       title="Welcome back"
       subtitle="Sign in to continue matching resumes to roles."
     >
-      <Button className="w-full" variant="secondary">
+      <Button className="w-full" variant="secondary" onClick={loginWithGoogle}>
         <Mail className="size-4" /> Continue with Google
       </Button>
       <div className="my-5 flex items-center gap-3 text-xs text-secondary">
@@ -71,9 +88,13 @@ export function LoginForm() {
             {...register("password")}
           />
         </Field>
-        <div className="rounded-[10px] border border-white/10 bg-white/4 px-3 py-2 text-sm text-secondary">
-          Error messages will appear here when authentication is connected.
-        </div>
+
+        {errorMessage && (
+          <div className="rounded-[10px] border border-white/10 bg-white/4 px-3 py-2 text-sm text-red-500">
+            {errorMessage}
+          </div>
+        )}
+
         <Button
           type="submit"
           variant="primary"
@@ -99,15 +120,45 @@ export function LoginForm() {
 
 export function RegisterForm() {
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const router = useRouter();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterValues>({ resolver: zodResolver(registerSchema) });
 
-  function onSubmit() {
+  async function onSubmit(data: RegisterValues) {
     setLoading(true);
-    window.setTimeout(() => setLoading(false), 900);
+    setErrorMessage("");
+
+    try {
+      const response = await fetch("api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setErrorMessage(
+          result.message || "An error occurred. Please try again.",
+        );
+        return;
+      }
+
+      router.push("/login");
+      router.refresh();
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -115,7 +166,7 @@ export function RegisterForm() {
       title="Create your account"
       subtitle="Use email or Google to start saving analyses."
     >
-      <Button className="w-full" variant="secondary">
+      <Button className="w-full" variant="secondary" onClick={loginWithGoogle}>
         <Mail className="size-4" /> Continue with Google
       </Button>
       <form className="mt-5 space-y-4" onSubmit={handleSubmit(onSubmit)}>
@@ -146,6 +197,13 @@ export function RegisterForm() {
             {...register("confirmPassword")}
           />
         </Field>
+
+        {errorMessage && (
+          <div className="rounded-[10px] border border-white/10 bg-white/4 px-3 py-2 text-sm text-red-500!">
+            {errorMessage}
+          </div>
+        )}
+
         <Button
           type="submit"
           variant="primary"
@@ -184,27 +242,5 @@ function AuthCard({
       <p className="mt-2 text-sm text-secondary">{subtitle}</p>
       <div className="mt-7">{children}</div>
     </Card>
-  );
-}
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block">
-      <span className="mb-2 block font-mono text-xs uppercase tracking-[0.02em] text-secondary">
-        {label}
-      </span>
-      {children}
-      {error ? (
-        <span className="mt-2 block text-sm text-amber-100">{error}</span>
-      ) : null}
-    </label>
   );
 }

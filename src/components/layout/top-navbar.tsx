@@ -2,6 +2,7 @@
 
 import { LogOut, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { logout } from "@/actions/auth";
 
 export function TopNavbar({ onMenuClick }: { onMenuClick: () => void }) {
   return (
@@ -27,7 +28,7 @@ export function TopNavbar({ onMenuClick }: { onMenuClick: () => void }) {
           <div className="grid size-9 place-items-center rounded-full border border-white/10 bg-white/6 text-xs font-semibold">
             HH
           </div>
-          <Button variant="ghost" className="h-10 px-3">
+          <Button variant="ghost" className="h-10 px-3" onClick={logout}>
             <LogOut className="size-4" />
             <span className="hidden sm:inline">Logout</span>
           </Button>

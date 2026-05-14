@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                 String    @id @default(uuid())
+  name               String?
+  email              String    @unique
+  emailVerified      DateTime?
+  image              String?
+
+  passwordHash       String?
+  provider           AuthProvider @default(CREDENTIALS)
+
+  role               UserRole  @default(USER)
+  dailyAnalysisLimit Int       @default(5)
+  isBlocked          Boolean   @default(false)
+
+  lastLoginAt        DateTime?
+  lastLoginIp        String?
+
+  accounts           Account[]
+  sessions           Session[]
+  usageLogs          UsageLog[]
+  authEvents         AuthEvent[]
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model UsageLog {
+  id        String      @id @default(uuid())
+  userId    String
+  action    UsageAction
+  ipAddress String?
+  userAgent String?
+  deviceHash String?
+  createdAt DateTime    @default(now())
+
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([ipAddress, createdAt])
+  @@index([deviceHash, createdAt])
+}
+
+model AuthEvent {
+  id         String        @id @default(uuid())
+  userId     String?
+  type       AuthEventType
+  ipAddress  String?
+  userAgent  String?
+  deviceHash String?
+  createdAt  DateTime      @default(now())
+
+  user       User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([ipAddress, createdAt])
+  @@index([deviceHash, createdAt])
+}
+
+enum AuthProvider {
+  CREDENTIALS
+  GOOGLE
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum UsageAction {
+  JOB_ANALYSIS
+  RESUME_PARSE
+  COVER_LETTER
+  INTERVIEW_PREP
+}
+
+enum AuthEventType {
+  SIGNUP
+  LOGIN
+  LOGOUT
+  GOOGLE_LOGIN
+  FAILED_LOGIN
+}
