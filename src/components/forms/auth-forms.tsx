@@ -12,8 +12,8 @@ import { Card } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { loginWithGoogle } from "@/actions/auth";
 import { useRouter } from "next/navigation";
-import Field from "../ui/fieldInput";
-import { loginWithCredentials } from "@/actions/auth";
+import Field from "../ui/field-input";
+import { signIn } from "next-auth/react";
 
 const loginSchema = z.object({
   email: z.email("Enter a valid email address."),
@@ -38,6 +38,7 @@ type RegisterValues = z.infer<typeof registerSchema>;
 export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -48,10 +49,19 @@ export function LoginForm() {
     setLoading(true);
 
     try {
-      const result = await loginWithCredentials(data.email, data.password);
+      const result = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+
       if (result?.error) {
-        setErrorMessage(result.error);
+        setErrorMessage("Incorrect email or password.");
+        return;
       }
+
+      router.replace("/dashboard");
+      router.refresh();
     } catch {
       setErrorMessage("An error occurred. Please try again.");
     } finally {
