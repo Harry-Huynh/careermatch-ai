@@ -1,3 +1,5 @@
+import { AnalysisReport } from "@/components/analysis/types";
+
 export const resumes = [
   {
     id: "resume-1",
@@ -15,11 +17,67 @@ export const resumes = [
   },
 ];
 
-export const analysisResult = {
+export const recentAnalyses = [
+  {
+    id: "analysis-1",
+    jobTitle: "Full-Stack Software Engineer",
+    company: "Northstar Labs",
+    fitScore: 78,
+    createdAt: "May 8, 2026",
+    status: "Saved",
+  },
+  {
+    id: "analysis-2",
+    jobTitle: "Frontend Platform Engineer",
+    company: "AtlasGrid",
+    fitScore: 84,
+    createdAt: "May 4, 2026",
+    status: "Saved",
+  },
+  {
+    id: "analysis-3",
+    jobTitle: "Backend Developer",
+    company: "SignalForge",
+    fitScore: 69,
+    createdAt: "April 29, 2026",
+    status: "Draft",
+  },
+];
+
+export const fitScoreHistory = [
+  { date: "Apr 12", score: 62 },
+  { date: "Apr 18", score: 68 },
+  { date: "Apr 24", score: 72 },
+  { date: "May 1", score: 75 },
+  { date: "May 8", score: 78 },
+];
+
+export const missingSkillsChart = [
+  { skill: "Docker", count: 6 },
+  { skill: "AWS", count: 5 },
+  { skill: "CI/CD", count: 4 },
+  { skill: "Testing", count: 4 },
+  { skill: "GraphQL", count: 2 },
+];
+
+export const dashboardStats = [
+  { label: "Total jobs analyzed", value: "12", trend: "+4 this month" },
+  { label: "Average fit score", value: "76%", trend: "+8% since April" },
+  { label: "Best match", value: "84%", trend: "Frontend Platform Engineer" },
+  {
+    label: "Most common missing skill",
+    value: "Docker",
+    trend: "Appears in 6 roles",
+  },
+];
+
+export const analysisResult: AnalysisReport = {
   id: "analysis-1",
   jobTitle: "Full-Stack Software Engineer",
   company: "Northstar Labs",
   fitScore: 78,
+  status: "Saved",
+  createdAt: "May 8, 2026",
   summary:
     "Your resume is a strong match for the role, especially across React, TypeScript, API development, and relational database experience. The main gaps are deployment, testing depth, and cloud operations language.",
   strengths: [
@@ -76,53 +134,3 @@ export const analysisResult = {
     ],
   },
 };
-
-export const recentAnalyses = [
-  {
-    id: "analysis-1",
-    jobTitle: "Full-Stack Software Engineer",
-    company: "Northstar Labs",
-    fitScore: 78,
-    createdAt: "May 8, 2026",
-    status: "Saved",
-  },
-  {
-    id: "analysis-2",
-    jobTitle: "Frontend Platform Engineer",
-    company: "AtlasGrid",
-    fitScore: 84,
-    createdAt: "May 4, 2026",
-    status: "Saved",
-  },
-  {
-    id: "analysis-3",
-    jobTitle: "Backend Developer",
-    company: "SignalForge",
-    fitScore: 69,
-    createdAt: "April 29, 2026",
-    status: "Draft",
-  },
-];
-
-export const fitScoreHistory = [
-  { date: "Apr 12", score: 62 },
-  { date: "Apr 18", score: 68 },
-  { date: "Apr 24", score: 72 },
-  { date: "May 1", score: 75 },
-  { date: "May 8", score: 78 },
-];
-
-export const missingSkillsChart = [
-  { skill: "Docker", count: 6 },
-  { skill: "AWS", count: 5 },
-  { skill: "CI/CD", count: 4 },
-  { skill: "Testing", count: 4 },
-  { skill: "GraphQL", count: 2 },
-];
-
-export const dashboardStats = [
-  { label: "Total jobs analyzed", value: "12", trend: "+4 this month" },
-  { label: "Average fit score", value: "76%", trend: "+8% since April" },
-  { label: "Best match", value: "84%", trend: "Frontend Platform Engineer" },
-  { label: "Most common missing skill", value: "Docker", trend: "Appears in 6 roles" },
-];
