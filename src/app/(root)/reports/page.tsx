@@ -89,7 +89,7 @@ export default function ReportsPage() {
                     <td className="px-5 py-4">
                       <Link
                         className="inline-flex h-9 items-center justify-center rounded-[10px] border border-lime bg-lime px-3 text-sm font-medium text-black transition hover:bg-lime/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime/40"
-                        href={`/jobs/${report.id}`}
+                        href={`/reports/${report.id}`}
                       >
                         View
                       </Link>
