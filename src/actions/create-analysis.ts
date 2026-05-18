@@ -223,5 +223,5 @@ export async function createAnalysis(input: CreateAnalysisInput) {
     return createdAnalysis;
   });
 
-  redirect(`/jobs/${analysis.id}`);
+  return `/reports/${analysis.id}`;
 }
